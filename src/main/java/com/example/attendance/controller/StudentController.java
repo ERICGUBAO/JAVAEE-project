@@ -1,38 +1,50 @@
 package com.example.attendance.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.attendance.entity.AttendanceUpdateRequest;
+import com.example.attendance.entity.Student;
+import com.example.attendance.service.StudentService;
+import com.example.attendance.util.Result;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class StudentController {
 
-    @GetMapping("/student/info")
-    public Map<String, Object> getStudentInfo() {
-        Map<String, Object> student = new LinkedHashMap<>();
-        student.put("name", "张三");
-        student.put("studentId", "2023001");
-        student.put("className", "数据可视化2026春");
-        return student;
+    @Autowired
+    private StudentService studentService;
+
+    // 任务一：路径参数
+    @GetMapping("/student/info/{studentId}")
+    public Result<Student> getStudentInfo(@PathVariable String studentId) {
+        try {
+            return Result.success(studentService.getStudentInfo(studentId));
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
     }
 
-    @PostMapping("/student/attendance")
-    public Map<String, Object> submitAttendance(@RequestBody Map<String, Object> body) {
-        Object studentId = body.get("studentId");
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("success", true);
-        result.put("message", "学号为 " + studentId + " 的学生打卡成功！");
-        return result;
+    // 任务二：查询参数
+    @GetMapping("/student/list")
+    public Result<List<Student>> listStudents(
+            @RequestParam(required = false) String className,
+            @RequestParam(defaultValue = "1") Integer page
+    ) {
+        try {
+            return Result.success("page=" + page, studentService.listStudents(className, page));
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
     }
 
-    @GetMapping("/student/courses")
-    public List<String> getCourses() {
-        return Arrays.asList("高等数学", "Java程序设计", "数据可视化");
+    // 任务三：JSON体参数
+    @PostMapping("/attendance/update")
+    public Result<String> updateAttendance(@RequestBody AttendanceUpdateRequest body) {
+        try {
+            return Result.success("更新成功", studentService.updateAttendance(body));
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
     }
 }
