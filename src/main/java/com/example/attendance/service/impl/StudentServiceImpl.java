@@ -1,69 +1,64 @@
 package com.example.attendance.service.impl;
 
-import com.example.attendance.entity.AttendanceUpdateRequest;
 import com.example.attendance.entity.Student;
+import com.example.attendance.repository.StudentRepository;
 import com.example.attendance.service.StudentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
+    private final StudentRepository studentRepository;
+
+    public StudentServiceImpl(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
+
     @Override
-    public Student getStudentInfo(String studentId) {
-        if (studentId == null || studentId.trim().isEmpty()) {
-            throw new RuntimeException("studentId 不能为空");
+    public Page<Student> list(String studentId, String studentName, Pageable pageable) {
+        String sid = studentId == null ? "" : studentId.trim();
+        String sname = studentName == null ? "" : studentName.trim();
+        return studentRepository.findByStudentIdContainingAndStudentNameContaining(sid, sname, pageable);
+    }
+
+    @Override
+    public Student findById(Integer id) {
+        return studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("未找到记录 id=" + id));
+    }
+
+    @Override
+    public void save(Student student) {
+        // 新增时补一个时间（可选）
+        if (student.getSelectTime() == null) {
+            student.setSelectTime(LocalDateTime.now());
         }
-
-        // Step5：先��假数据，Step6/7/8 再接 Dao + 数据库
-        Student s = new Student();
-        s.setStudentId(studentId);
-        s.setName("张三");
-        s.setClassName("数据可视化2026春");
-        return s;
+        studentRepository.save(student);
     }
 
     @Override
-    public List<Student> listStudents(String className, Integer page) {
-        int p = (page == null || page < 1) ? 1 : page;
+    public void update(Student student) {
+        if (student.getId() == null) throw new RuntimeException("更新失败：id 不能为空");
+        if (!studentRepository.existsById(student.getId()))
+            throw new RuntimeException("更新失败：记录不存在 id=" + student.getId());
 
-        // 这里按课件：className 是筛选条件（可选）
-        String finalClassName = (className == null || className.trim().isEmpty())
-                ? "数据可视化2026春"
-                : className.trim();
-
-        // Step5：假数据
-        List<Student> list = new ArrayList<>();
-
-        Student s1 = new Student();
-        s1.setStudentId("2023001");
-        s1.setName("张三");
-        s1.setClassName(finalClassName);
-        list.add(s1);
-
-        Student s2 = new Student();
-        s2.setStudentId("2023002");
-        s2.setName("李四");
-        s2.setClassName(finalClassName);
-        list.add(s2);
-
-        // 这里只演示 page 参数接收成功，不做真实分页
-        return list;
+        // 不强制覆盖 selectTime（如果你想保留原值，就不动）
+        studentRepository.save(student);
     }
 
     @Override
-    public String updateAttendance(AttendanceUpdateRequest body) {
-        if (body == null) throw new RuntimeException("请求体不能为空");
-        if (body.getStudentId() == null || body.getStudentId().trim().isEmpty())
-            throw new RuntimeException("studentId 不能为空");
-        if (body.getDate() == null || body.getDate().trim().isEmpty())
-            throw new RuntimeException("date 不能为空");
-        if (body.getStatus() == null || body.getStatus().trim().isEmpty())
-            throw new RuntimeException("status 不能为空");
+    public void deleteById(Integer id) {
+        studentRepository.deleteById(id);
+    }
 
-        return "学号 " + body.getStudentId().trim() + " 在 " + body.getDate().trim()
-                + " 考勤更新为 " + body.getStatus().trim();
+    @Override
+    public void batchDelete(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return;
+        studentRepository.deleteAllById(ids);
     }
 }

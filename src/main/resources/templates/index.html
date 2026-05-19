@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>系统首页</title>
+
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="page">
+<div class="card">
+    <h2>系统首页</h2>
+    <p>欢迎你：<b th:text="${username}">user</b></p>
+    <p>角色：<b th:text="${role}">TEACHER</b></p>
+
+    <div class="mt-3">
+        <a class="btn btn-primary" th:href="@{/student/list}">进入学生管理</a>
+    </div>
+
+    <form class="mt-3" th:action="@{/logout}" method="post">
+        <button type="submit">退出登录</button>
+    </form>
+</div>
+</body>
+</html>

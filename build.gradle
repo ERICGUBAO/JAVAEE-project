@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '4.0.3'
+    id 'org.springframework.boot' version '3.4.4'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -19,9 +19,27 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // Web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // ✅ JPA（第七周要用）
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // （可选）你原来用 JdbcTemplate 的话先保留，迁移完再删除
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // MySQL 驱动
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // Test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // build.gradle
+    implementation 'org.webjars:bootstrap:5.3.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {

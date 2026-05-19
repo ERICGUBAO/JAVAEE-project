@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>注册</title>
+
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body class="page">
+<div class="card">
+    <h2>用户注册</h2>
+
+    <form th:action="@{/register}" method="post">
+        <div class="row">
+            <label>用户名：</label>
+            <input type="text" name="username" th:value="${username}" required />
+        </div>
+
+        <div class="row">
+            <label>密码：</label>
+            <input type="password" name="password" required />
+        </div>
+
+        <div class="row">
+            <label>确认密码：</label>
+            <input type="password" name="confirmPassword" required />
+        </div>
+
+        <div class="row">
+            <label>真实姓名：</label>
+            <input type="text" name="realName" th:value="${realName}" required />
+        </div>
+
+        <div class="row">
+            <label>角色：</label>
+            <select name="role">
+                <option value="STUDENT" th:selected="${role == 'STUDENT'}">STUDENT</option>
+                <option value="TEACHER" th:selected="${role == null || role == 'TEACHER'}">TEACHER</option>
+                <option value="ADMIN" th:selected="${role == 'ADMIN'}">ADMIN</option>
+            </select>
+        </div>
+
+        <p class="error" th:if="${errorMsg != null}" th:text="${errorMsg}"></p>
+
+        <button type="submit">注册</button>
+    </form>
+
+    <p class="link"><a th:href="@{/login}">已有账号？去登录</a></p>
+</div>
+</body>
+</html>

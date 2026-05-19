@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${student.id == null ? '新增学生' : '编辑学生'}">学生表单</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container mt-4">
+
+    <h2 class="mb-4" th:text="${student.id == null ? '新增学生' : '编辑学生'}">编辑学生</h2>
+
+    <form th:object="${student}"
+          th:action="@{${student.id == null} ? '/student/save' : '/student/update'}"
+          method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="mb-3">
+            <label class="form-label">学号</label>
+            <input class="form-control" th:field="*{studentId}" />
+            <div class="text-danger" th:if="${#fields.hasErrors('studentId')}" th:errors="*{studentId}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">姓名</label>
+            <input class="form-control" th:field="*{studentName}" />
+            <div class="text-danger" th:if="${#fields.hasErrors('studentName')}" th:errors="*{studentName}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">性别</label>
+            <select class="form-select" th:field="*{gender}">
+                <option value="">-- 请选择 --</option>
+                <option value="M">M</option>
+                <option value="F">F</option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+        </div>
+
+        <!-- ✅ 课程下拉框：数据库 course 表动态读取 -->
+        <div class="mb-3">
+            <label class="form-label">课程</label>
+            <select class="form-select" th:field="*{courseId}" required>
+                <option value="">-- 请选择课程 --</option>
+                <option th:each="c : ${courses}"
+                        th:value="${c.courseId}"
+                        th:text="${c.courseId + ' - ' + c.courseName}">
+                </option>
+            </select>
+            <div class="text-danger" th:if="${#fields.hasErrors('courseId')}" th:errors="*{courseId}"></div>
+        </div>
+
+        <!-- ✅ 出生日期：用 th:field，配合 Student.java 的 @DateTimeFormat(pattern="yyyy-MM-dd") 才能稳定回显/提交 -->
+        <div class="mb-3">
+            <label class="form-label">出生日期</label>
+            <input type="date" class="form-control" th:field="*{birthDate}" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">联系方式</label>
+            <input class="form-control" th:field="*{phone}" placeholder="如 13800138000" />
+            <div class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+        </div>
+
+        <!-- ✅ 选课时间：不让用户填，只读显示；新增/为空由后端自动写当前时间 -->
+        <div class="mb-3">
+            <label class="form-label">选课时间</label>
+            <input class="form-control"
+                   th:value="${student.selectTime != null ? #temporals.format(student.selectTime, 'yyyy-MM-dd HH:mm:ss') : '（新增后自动生成）'}"
+                   readonly />
+        </div>
+
+        <button type="submit" class="btn btn-primary">保存</button>
+        <a class="btn btn-secondary" th:href="@{/student/list}">返回列表</a>
+    </form>
+
+</div>
+</body>
+</html>

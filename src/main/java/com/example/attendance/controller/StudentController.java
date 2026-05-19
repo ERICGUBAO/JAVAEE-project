@@ -1,50 +1,106 @@
 package com.example.attendance.controller;
 
-import com.example.attendance.entity.AttendanceUpdateRequest;
 import com.example.attendance.entity.Student;
+import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.service.StudentService;
-import com.example.attendance.util.Result;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@PreAuthorize("hasAnyRole('ADMIN','TEACHER')")
+@Controller
 public class StudentController {
 
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
+    private final CourseRepository courseRepository;
 
-    // 任务一：路径参数
-    @GetMapping("/student/info/{studentId}")
-    public Result<Student> getStudentInfo(@PathVariable String studentId) {
-        try {
-            return Result.success(studentService.getStudentInfo(studentId));
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
+    public StudentController(StudentService studentService, CourseRepository courseRepository) {
+        this.studentService = studentService;
+        this.courseRepository = courseRepository;
     }
 
-    // 任务二：查询参数
     @GetMapping("/student/list")
-    public Result<List<Student>> listStudents(
-            @RequestParam(required = false) String className,
-            @RequestParam(defaultValue = "1") Integer page
-    ) {
-        try {
-            return Result.success("page=" + page, studentService.listStudents(className, page));
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
+    public String list(@RequestParam(required = false) String studentId,
+                       @RequestParam(required = false) String studentName,
+                       @RequestParam(defaultValue = "1") int page,
+                       @RequestParam(defaultValue = "10") int size,
+                       @RequestParam(defaultValue = "id") String sortField,
+                       @RequestParam(defaultValue = "desc") String sortDir,
+                       Model model) {
+
+        Sort.Direction dir = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        if (!List.of("id","studentId","studentName","courseId","selectTime").contains(sortField)) sortField = "id";
+
+        PageRequest pageable = PageRequest.of(page - 1, size, Sort.by(dir, sortField));
+        Page<Student> studentPage = studentService.list(studentId, studentName, pageable);
+
+        model.addAttribute("students", studentPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", studentPage.getTotalPages());
+        model.addAttribute("totalElements", studentPage.getTotalElements());
+
+        model.addAttribute("studentId", studentId == null ? "" : studentId);
+        model.addAttribute("studentName", studentName == null ? "" : studentName);
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+
+        return "student-list";
     }
 
-    // 任务三：JSON体参数
-    @PostMapping("/attendance/update")
-    public Result<String> updateAttendance(@RequestBody AttendanceUpdateRequest body) {
-        try {
-            return Result.success("更新成功", studentService.updateAttendance(body));
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
+    @GetMapping("/student/add")
+    public String addPage(Model model) {
+        model.addAttribute("student", new Student());
+        model.addAttribute("courses", courseRepository.findAll(Sort.by("courseId")));
+        return "student-form";
+    }
+
+    @PostMapping("/student/save")
+    public String save(@Valid @ModelAttribute("student") Student student,
+                       BindingResult br,
+                       Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("courses", courseRepository.findAll(Sort.by("courseId")));
+            return "student-form";
         }
+        studentService.save(student);
+        return "redirect:/student/list";
+    }
+
+    @GetMapping("/student/edit/{id}")
+    public String editPage(@PathVariable Integer id, Model model) {
+        model.addAttribute("student", studentService.findById(id));
+        model.addAttribute("courses", courseRepository.findAll(Sort.by("courseId")));
+        return "student-form";
+    }
+
+    @PostMapping("/student/update")
+    public String update(@Valid @ModelAttribute("student") Student student,
+                         BindingResult br,
+                         Model model) {
+        if (br.hasErrors()) {
+            model.addAttribute("courses", courseRepository.findAll(Sort.by("courseId")));
+            return "student-form";
+        }
+        studentService.update(student);
+        return "redirect:/student/list";
+    }
+
+    @GetMapping("/student/delete/{id}")
+    public String delete(@PathVariable Integer id) {
+        studentService.deleteById(id);
+        return "redirect:/student/list";
+    }
+
+    @PostMapping("/student/batchDelete")
+    public String batchDelete(@RequestParam(required = false) List<Integer> ids) {
+        studentService.batchDelete(ids);
+        return "redirect:/student/list";
     }
 }
