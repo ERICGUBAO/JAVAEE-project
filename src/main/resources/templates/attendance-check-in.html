@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>签到打卡 — 考勤管理系统</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+    <div class="container" style="max-width:680px;">
+
+        <div class="page-header">
+            <h2>📋 签到打卡</h2>
+        </div>
+
+        <div class="alert alert-success" th:if="${param.success}" role="alert">
+            ✅ 操作成功！
+        </div>
+        <div class="alert alert-danger" th:if="${param.error}" th:text="${param.error[0]}" role="alert"></div>
+
+        <!-- 当前时间显示 -->
+        <div class="content-card mb-4 text-center" style="padding:20px;">
+            <p class="text-muted mb-1" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.5px;">当前时间</p>
+            <div id="clock" style="font-size:2rem; font-weight:700; color:#1e293b; letter-spacing:2px;">--:--:--</div>
+            <p class="text-muted mb-0" id="date-display" style="font-size:.875rem;"></p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 签到 -->
+            <div class="col-md-6">
+                <div class="checkin-card h-100">
+                    <h5>🟢 签到</h5>
+                    <form th:action="@{/attendance/checkIn}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="checkInCourse">选择课程</label>
+                            <select class="form-select" id="checkInCourse" name="courseId" required>
+                                <option value="">— 请选择课程 —</option>
+                                <option th:each="c : ${courses}"
+                                        th:value="${c.courseId}"
+                                        th:text="${c.courseId + ' · ' + c.courseName + (c.startTime != null ? '  ' + c.startTime : '')}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">备注（可选）</label>
+                            <textarea class="form-control" name="remark" rows="2"
+                                      placeholder="如有特殊情况可填写备注…" style="border-radius:8px; border:1.5px solid var(--border); font-size:.875rem;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">确认签到</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 签退 -->
+            <div class="col-md-6">
+                <div class="checkin-card h-100">
+                    <h5>🔴 签退</h5>
+                    <form th:action="@{/attendance/checkOut}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label" for="checkOutCourse">选择课程</label>
+                            <select class="form-select" id="checkOutCourse" name="courseId" required>
+                                <option value="">— 请选择课程 —</option>
+                                <option th:each="c : ${courses}"
+                                        th:value="${c.courseId}"
+                                        th:text="${c.courseId + ' · ' + c.courseName + (c.endTime != null ? '  ' + c.endTime : '')}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-muted" style="font-size:.8125rem; background:#f8fafc; border-radius:8px; padding:12px; border:1px solid var(--border);">
+                                💡 签退时间早于下课前 5 分钟将被标记为<strong>早退</strong>
+                            </p>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100" style="border-radius:8px; font-weight:500;">确认签退</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+<script>
+    function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString('zh-CN', {hour12: false});
+        const date = now.toLocaleDateString('zh-CN', {year:'numeric', month:'long', day:'numeric', weekday:'long'});
+        document.getElementById('clock').textContent = time;
+        document.getElementById('date-display').textContent = date;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

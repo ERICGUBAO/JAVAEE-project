@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>批量导入 — 考勤管理系统</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+    <div class="container" style="max-width:680px;">
+
+        <div class="page-header">
+            <h2>📥 批量导入考勤</h2>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}" role="alert"></div>
+        <div class="alert alert-danger"  th:if="${error}"   th:text="${error}"   role="alert"></div>
+
+        <div class="content-card">
+            <form th:action="@{/attendance/import}" method="post" enctype="multipart/form-data">
+
+                <div class="upload-zone mb-4" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon">📄</div>
+                    <p class="mb-1" style="font-weight:600; color:#1e293b;">点击选择 Excel 文件</p>
+                    <p>支持 .xlsx / .xls 格式</p>
+                    <p id="fileName" class="mt-2" style="color:#4f46e5; font-weight:500; display:none;"></p>
+                </div>
+                <input type="file" id="fileInput" name="file" accept=".xlsx,.xls"
+                       required style="display:none;" onchange="showFileName(this)" />
+
+                <div style="background:#f8fafc; border-radius:8px; padding:14px 16px; border:1px solid var(--border); margin-bottom:20px; font-size:.8rem;">
+                    <p class="mb-2" style="font-weight:600; color:var(--muted);">📋 Excel 列格式：A=student_id &nbsp;B=course_id &nbsp;C=check_in_time &nbsp;D=check_out_time(可空) &nbsp;E=status(可空)</p>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100" style="padding:11px;">上传并导入</button>
+            </form>
+        </div>
+
+        <div class="content-card mt-4" th:if="${errors != null and !#lists.isEmpty(errors)}">
+            <h6 class="mb-3" style="font-weight:600; color:var(--danger);">⚠️ 导入失败明细</h6>
+            <div class="data-table">
+                <table class="table table-sm mb-0">
+                    <thead>
+                    <tr><th style="width:80px;">行号</th><th>失败原因</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${errors}">
+                        <td th:text="${e.rowNum}"></td>
+                        <td th:text="${e.reason}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+<script>
+    function showFileName(input) {
+        const label = document.getElementById('fileName');
+        if (input.files && input.files[0]) {
+            label.textContent = '已选择：' + input.files[0].name;
+            label.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

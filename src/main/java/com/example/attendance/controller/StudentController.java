@@ -1,5 +1,6 @@
 package com.example.attendance.controller;
 
+import com.example.attendance.annotation.OpLog;
 import com.example.attendance.entity.Student;
 import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.service.StudentService;
@@ -61,6 +62,7 @@ public class StudentController {
         return "student-form";
     }
 
+    @OpLog("新增学生")
     @PostMapping("/student/save")
     public String save(@Valid @ModelAttribute("student") Student student,
                        BindingResult br,
@@ -80,6 +82,7 @@ public class StudentController {
         return "student-form";
     }
 
+    @OpLog("编辑学生")
     @PostMapping("/student/update")
     public String update(@Valid @ModelAttribute("student") Student student,
                          BindingResult br,
@@ -92,12 +95,14 @@ public class StudentController {
         return "redirect:/student/list";
     }
 
+    @OpLog("删除学生")
     @GetMapping("/student/delete/{id}")
     public String delete(@PathVariable Integer id) {
         studentService.deleteById(id);
         return "redirect:/student/list";
     }
 
+    @OpLog("批量删除学生")
     @PostMapping("/student/batchDelete")
     public String batchDelete(@RequestParam(required = false) List<Integer> ids) {
         studentService.batchDelete(ids);

@@ -40,6 +40,15 @@ dependencies {
     // build.gradle
     implementation 'org.webjars:bootstrap:5.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+    // ✅ AOP（操作日志需要）
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // ✅ Spring Cache 抽象层（内置缓存，无需外部服务）
+    // 如果以后装了 Redis，只需改配置，代码不用动
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
 }
 
 tasks.named('test') {

@@ -1,6 +1,7 @@
 package com.example.attendance.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,10 +21,18 @@ public class Attendance {
     @Column(name = "course_id", nullable = false, length = 20)
     private String courseId;
 
+    // ✅ 你原来就有
     @Column(name = "check_in_time", nullable = false)
     private LocalDateTime checkInTime;
 
-    // MySQL: tinyint -> Java: Byte（最匹配）
+    // ✅ 新增：签退时间
+    @Column(name = "check_out_time")
+    private LocalDateTime checkOutTime;
+
+    // ✅ 新增：用于唯一约束（student_id + course_id + attend_date）
+    @Column(name = "attend_date", nullable = false)
+    private LocalDate attendDate;
+
     @Column(name = "seat_row")
     private Byte seatRow;
 
@@ -39,88 +48,41 @@ public class Attendance {
     @Column(name = "create_time")
     private LocalDateTime createTime;
 
-    // ===== Constructors =====
-    public Attendance() {
-    }
+    public Attendance() {}
 
-    // ===== Getters / Setters =====
-    public Integer getId() {
-        return id;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
 
-    public String getStudentId() {
-        return studentId;
-    }
+    public String getStudentName() { return studentName; }
+    public void setStudentName(String studentName) { this.studentName = studentName; }
 
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
-    }
+    public String getCourseId() { return courseId; }
+    public void setCourseId(String courseId) { this.courseId = courseId; }
 
-    public String getStudentName() {
-        return studentName;
-    }
+    public LocalDateTime getCheckInTime() { return checkInTime; }
+    public void setCheckInTime(LocalDateTime checkInTime) { this.checkInTime = checkInTime; }
 
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
+    public LocalDateTime getCheckOutTime() { return checkOutTime; }
+    public void setCheckOutTime(LocalDateTime checkOutTime) { this.checkOutTime = checkOutTime; }
 
-    public String getCourseId() {
-        return courseId;
-    }
+    public LocalDate getAttendDate() { return attendDate; }
+    public void setAttendDate(LocalDate attendDate) { this.attendDate = attendDate; }
 
-    public void setCourseId(String courseId) {
-        this.courseId = courseId;
-    }
+    public Byte getSeatRow() { return seatRow; }
+    public void setSeatRow(Byte seatRow) { this.seatRow = seatRow; }
 
-    public LocalDateTime getCheckInTime() {
-        return checkInTime;
-    }
+    public Byte getSeatCol() { return seatCol; }
+    public void setSeatCol(Byte seatCol) { this.seatCol = seatCol; }
 
-    public void setCheckInTime(LocalDateTime checkInTime) {
-        this.checkInTime = checkInTime;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public Byte getSeatRow() {
-        return seatRow;
-    }
+    public String getIp() { return ip; }
+    public void setIp(String ip) { this.ip = ip; }
 
-    public void setSeatRow(Byte seatRow) {
-        this.seatRow = seatRow;
-    }
-
-    public Byte getSeatCol() {
-        return seatCol;
-    }
-
-    public void setSeatCol(Byte seatCol) {
-        this.seatCol = seatCol;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
+    public LocalDateTime getCreateTime() { return createTime; }
+    public void setCreateTime(LocalDateTime createTime) { this.createTime = createTime; }
 }

@@ -2,32 +2,45 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <title th:text="${title}">用户登录</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>登录 — 考勤管理系统</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
     <link rel="stylesheet" th:href="@{/css/app.css}" />
 </head>
-<body class="page">
-<div class="card">
-    <h2 th:text="${title}">用户登录</h2>
+<body class="auth-page">
+<div class="auth-card">
+    <div class="brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </div>
+        <h2>欢迎回来</h2>
+        <p class="subtitle">班级考勤管理系统</p>
+    </div>
+
+    <div class="alert alert-danger" th:if="${errorMsg != null}" th:text="${errorMsg}" role="alert"></div>
+    <div class="alert alert-success" th:if="${successMsg != null}" th:text="${successMsg}" role="alert"></div>
+    <div class="alert alert-success" th:if="${param.logout}" role="alert">已成功退出登录</div>
+    <div class="alert alert-danger" th:if="${param.error}" role="alert">用户名或密码错误，请重试</div>
 
     <form th:action="@{/login}" method="post">
-        <div class="row">
-            <label>用户名：</label>
-            <input type="text" name="username" required />
+        <div class="mb-3">
+            <label class="form-label" for="username">用户名</label>
+            <input type="text" class="form-control" id="username" name="username"
+                   placeholder="请输入用户名" required autofocus />
         </div>
-        <div class="row">
-            <label>密码：</label>
-            <input type="password" name="password" required />
+        <div class="mb-4">
+            <label class="form-label" for="password">密码</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   placeholder="请输入密码" required />
         </div>
-
-        <p class="error" th:if="${errorMsg != null}" th:text="${errorMsg}"></p>
-        <p class="success" th:if="${successMsg != null}" th:text="${successMsg}"></p>
-
-        <button type="submit">登录</button>
+        <button type="submit" class="btn-auth">登 录</button>
     </form>
 
-    <p class="link"><a th:href="@{/register}">没有账号？去注册</a></p>
+    <p class="auth-footer">
+        还没有账号？<a th:href="@{/register}">立即注册</a>
+    </p>
 </div>
 </body>
 </html>

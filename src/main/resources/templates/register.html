@@ -2,51 +2,60 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <title>注册</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>注册 — 考勤管理系统</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
     <link rel="stylesheet" th:href="@{/css/app.css}" />
 </head>
-<body class="page">
-<div class="card">
-    <h2>用户注册</h2>
+<body class="auth-page">
+<div class="auth-card">
+    <div class="brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+        </div>
+        <h2>创建账号</h2>
+        <p class="subtitle">班级考勤管理系统</p>
+    </div>
+
+    <div class="alert alert-danger" th:if="${errorMsg != null}" th:text="${errorMsg}" role="alert"></div>
 
     <form th:action="@{/register}" method="post">
-        <div class="row">
-            <label>用户名：</label>
-            <input type="text" name="username" th:value="${username}" required />
+        <div class="mb-3">
+            <label class="form-label" for="username">用户名</label>
+            <input type="text" class="form-control" id="username" name="username"
+                   th:value="${username}" placeholder="请输入用户名" required />
         </div>
-
-        <div class="row">
-            <label>密码：</label>
-            <input type="password" name="password" required />
+        <div class="mb-3">
+            <label class="form-label" for="realName">真实姓名</label>
+            <input type="text" class="form-control" id="realName" name="realName"
+                   th:value="${realName}" placeholder="请输入真实姓名" required />
         </div>
-
-        <div class="row">
-            <label>确认密码：</label>
-            <input type="password" name="confirmPassword" required />
+        <div class="mb-3">
+            <label class="form-label" for="password">密码</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   placeholder="请输入密码" required />
         </div>
-
-        <div class="row">
-            <label>真实姓名：</label>
-            <input type="text" name="realName" th:value="${realName}" required />
+        <div class="mb-3">
+            <label class="form-label" for="confirmPassword">确认密码</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                   placeholder="再次输入密码" required />
         </div>
-
-        <div class="row">
-            <label>角色：</label>
-            <select name="role">
-                <option value="STUDENT" th:selected="${role == 'STUDENT'}">STUDENT</option>
-                <option value="TEACHER" th:selected="${role == null || role == 'TEACHER'}">TEACHER</option>
-                <option value="ADMIN" th:selected="${role == 'ADMIN'}">ADMIN</option>
+        <div class="mb-4">
+            <label class="form-label" for="role">角色</label>
+            <select class="form-select" id="role" name="role">
+                <option value="STUDENT" th:selected="${role == 'STUDENT'}">学生 (STUDENT)</option>
+                <option value="TEACHER" th:selected="${role == null || role == 'TEACHER'}">教师 (TEACHER)</option>
+                <option value="ADMIN" th:selected="${role == 'ADMIN'}">管理员 (ADMIN)</option>
             </select>
         </div>
-
-        <p class="error" th:if="${errorMsg != null}" th:text="${errorMsg}"></p>
-
-        <button type="submit">注册</button>
+        <button type="submit" class="btn-auth">注 册</button>
     </form>
 
-    <p class="link"><a th:href="@{/login}">已有账号？去登录</a></p>
+    <p class="auth-footer">
+        已有账号？<a th:href="@{/login}">返回登录</a>
+    </p>
 </div>
 </body>
 </html>

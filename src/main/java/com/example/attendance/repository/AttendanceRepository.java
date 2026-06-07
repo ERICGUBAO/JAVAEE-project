@@ -1,16 +1,14 @@
-// src/main/java/com/example/attendance/repository/AttendanceRepository.java
 package com.example.attendance.repository;
 
 import com.example.attendance.entity.Attendance;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Optional;
 
-public interface AttendanceRepository extends JpaRepository<Attendance, Integer> {
+public interface AttendanceRepository extends JpaRepository<Attendance, Integer>,
+        JpaSpecificationExecutor<Attendance> {
 
-    List<Attendance> findByCourseId(String courseId);
-
-    List<Attendance> findByStudentId(String studentId);
-
-    List<Attendance> findByCourseIdAndStudentId(String courseId, String studentId);
+    Optional<Attendance> findByStudentIdAndCourseIdAndAttendDate(String studentId, String courseId, LocalDate attendDate);
 }
