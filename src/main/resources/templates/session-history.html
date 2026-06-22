@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>签到记录 — 考勤管理系统</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+    <div class="container" style="max-width:800px;">
+
+        <div class="page-header">
+            <h2>📋 签到记录</h2>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/}">← 首页</a>
+        </div>
+
+        <p th:if="${#lists.isEmpty(sessions)}" class="text-center text-muted py-5">暂无签到记录</p>
+
+        <div class="att-card" th:each="s : ${sessions}" style="cursor:pointer;"
+             th:attr="data-url='/attendance/list?startDate='+${#temporals.format(s.startTime, 'yyyy-MM-dd')}+'&endDate='+${#temporals.format(s.startTime, 'yyyy-MM-dd')}+'&courseId='+${s.courseId}"
+             onclick="window.location.href=this.getAttribute('data-url')">
+            <div class="top-row">
+                <div>
+                    <strong th:text="${s.courseName} + ' · ' + ${s.courseId}">课程</strong>
+                    <span class="status-badge ms-2"
+                          th:classappend="${s.status=='CLOSED'}?'absent':'normal'"
+                          th:text="${s.status=='CLOSED'}?'已结束':'进行中'"></span>
+                </div>
+                <div style="font-size:1.4rem;font-weight:800;color:var(--primary);" th:text="${s.checkedIn}+'/'+${s.total}">0/0</div>
+            </div>
+            <div class="meta">
+                <span th:text="${#temporals.format(s.startTime, 'MM-dd HH:mm')}">时间</span>
+                <span class="ms-3" th:text="'口令: '+${s.code}"></span>
+                <span class="ms-3" th:text="'发起人: '+${s.teacherName}"></span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/webjars/bootstrap/5.3.0/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

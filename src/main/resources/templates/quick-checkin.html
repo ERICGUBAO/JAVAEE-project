@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>课堂签到</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center}
+        .card{background:#fff;border-radius:20px;padding:32px 28px;width:92%;max-width:400px;box-shadow:0 12px 48px rgba(0,0,0,.2);text-align:center}
+        .card h3{font-size:1.3rem;margin-bottom:6px}
+        .card .sub{color:#64748b;font-size:.875rem;margin-bottom:20px}
+        .card .big-btn{display:block;width:100%;padding:18px;background:#4f46e5;color:#fff;border:none;border-radius:14px;font-size:1.2rem;font-weight:700;cursor:pointer;margin-bottom:12px}
+        .card .big-btn:active{background:#4338ca;transform:scale(.98)}
+        .card input{width:100%;padding:14px;border:2px solid #e2e8f0;border-radius:12px;font-size:1.1rem;text-align:center;margin-bottom:12px;outline:none}
+        .card input:focus{border-color:#4f46e5}
+        .card .btn-submit{width:100%;padding:14px;background:#4f46e5;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer}
+        .result{margin-top:16px;font-weight:700;font-size:1rem}
+        .result.ok{color:#16a34a}.result.err{color:#dc2626}
+        .user-badge{display:inline-block;background:#eef2ff;color:#4f46e5;padding:6px 16px;border-radius:20px;font-weight:600;margin-bottom:8px;font-size:.9rem}
+    </style>
+</head>
+<body>
+
+<!-- 已过期 -->
+<div class="card" th:if="${expired}">
+    <h3>签到已过期</h3>
+    <p class="sub">请联系教师重新发起签到</p>
+</div>
+
+<!-- 已登录用户：一键确认 -->
+<div class="card" th:if="${not expired and loggedIn}">
+    <h3 th:text="'📋 ' + ${courseName}">课程签到</h3>
+    <p class="sub" th:text="${teacherName} + ' · ' + ${courseId}"></p>
+    <div class="user-badge" th:text="${autoStudentName} + ' (' + ${autoStudentId} + ')'"></div>
+
+    <!-- 已签到：直接显示成功 -->
+    <div th:if="${alreadyCheckedIn}" style="margin-top:16px;">
+        <div style="font-size:3rem;">✅</div>
+        <p style="color:#16a34a;font-weight:700;font-size:1.1rem;">已签到</p>
+        <p class="sub" style="margin-top:4px;">你已经签过到了，无需重复操作</p>
+    </div>
+
+    <!-- 未签到：显示确认按钮 -->
+    <div th:if="${not alreadyCheckedIn}">
+        <p class="sub" style="margin-bottom:12px;">确认身份后点击签到</p>
+        <button class="big-btn" onclick="doConfirm()">确认签到</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <p style="font-size:.75rem;color:#94a3b8;margin-top:12px;">不是本人？<a href="/logout" style="color:#4f46e5;">切换账号</a></p>
+</div>
+
+<!-- 未登录用户：输入学号和姓名 -->
+<div class="card" th:if="${not expired and not loggedIn}">
+    <h3 th:text="'📋 ' + ${courseName}">课程签到</h3>
+    <p class="sub" th:text="${teacherName} + ' · ' + ${courseId}"></p>
+    <form id="f">
+        <input type="hidden" name="code" th:value="${sessionCode}" />
+        <input type="text" name="studentId" placeholder="输入学号" required autofocus />
+        <input type="text" name="studentName" placeholder="输入姓名（可选）" />
+        <button class="btn-submit" type="submit">确认签到</button>
+    </form>
+    <div id="result2" class="result"></div>
+</div>
+
+<script>
+    // 已登录：一键确认
+    async function doConfirm() {
+        var fd = new FormData();
+        fd.append('code', '[[${sessionCode}]]');
+        fd.append('studentId', '[[${autoStudentId}]]');
+        fd.append('studentName', '[[${autoStudentName}]]');
+        var resp = await fetch('/qr/checkin', {method:'POST', body:fd});
+        var text = await resp.text();
+        var el = document.getElementById('result');
+        el.textContent = text;
+        el.className = 'result ' + (text.indexOf('成功')>=0 ? 'ok' : 'err');
+    }
+
+    // 未登录：表单提交
+    document.addEventListener('DOMContentLoaded', function() {
+        var f = document.getElementById('f');
+        if (!f) return;
+        f.onsubmit = async function(e) {
+            e.preventDefault();
+            var fd = new FormData(this);
+            var resp = await fetch('/qr/checkin', {method:'POST', body:fd});
+            var text = await resp.text();
+            var el = document.getElementById('result2');
+            el.textContent = text;
+            el.className = 'result ' + (text.indexOf('成功')>=0 ? 'ok' : 'err');
+        };
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>签到面板</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container mt-4">
+
+    <div class="alert alert-danger" th:if="${errorMsg != null}" th:text="${errorMsg}"></div>
+
+    <div th:if="${s == null}">
+        <h4>会话不存在或已过期</h4>
+        <a class="btn btn-primary" th:href="@{/attendance/session/create}">重新发起签到</a>
+    </div>
+
+    <div th:if="${s != null and p != null}">
+        <div class="text-center mb-4 p-4" style="background:#eef2ff; border-radius:16px;">
+            <h5 th:text="${p.courseName} + ' (' + ${p.courseId} + ')'">课程</h5>
+            <!-- QR码 -->
+            <div class="mb-2">
+                <img id="qrcode" src="" style="width:200px; height:200px; border-radius:12px;" alt="扫码签到" />
+            </div>
+            <p class="text-muted mb-2" style="font-size:.8rem;">微信扫码签到</p>
+            <button class="btn btn-sm btn-outline-secondary" onclick="revealCode()" id="revealBtn">🔒 点击显示口令</button>
+            <h1 id="codeDisplay" style="font-size:4rem;letter-spacing:16px;font-family:monospace;color:#4f46e5;display:none;" th:text="${p.code}">0000</h1>
+            <p>状态: <span th:text="${p.status}">ACTIVE</span></p>
+        </div>
+
+        <div class="row text-center mb-4">
+            <div class="col-4"><h2 style="color:#16a34a;" th:text="${p.checkedInCount}">0</h2><small>已签到</small></div>
+            <div class="col-4"><h2 style="color:#dc2626;" th:text="${#lists.size(p.uncheckedNames)}">0</h2><small>未签到</small></div>
+            <div class="col-4"><h2 style="color:#4f46e5;" th:text="${p.totalStudents}">0</h2><small>应到</small></div>
+        </div>
+
+        <div class="d-flex gap-2 mb-4">
+            <form th:action="@{'/attendance/session/extend/' + ${s.id}}" method="post" style="display:inline;">
+                <button class="btn btn-outline-primary btn-sm" type="submit">⏳ 延长1分钟</button>
+            </form>
+            <button class="btn btn-outline-secondary btn-sm" onclick="showManual()">✍️ 代签</button>
+            <form th:action="@{'/attendance/session/close/' + ${s.id}}" method="post" style="display:inline; margin-left:auto;" onsubmit="return confirm('确定关闭签到？')">
+                <button class="btn btn-danger btn-sm" type="submit">⏹ 关闭签到</button>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="col-6">
+                <h6 style="color:#dc2626;">未签到</h6>
+                <div id="uncheckedList">
+                    <div th:each="n : ${p.uncheckedNames}" class="py-1" th:text="${n}" style="font-weight:500;"></div>
+                    <p th:if="${#lists.isEmpty(p.uncheckedNames)}" class="text-muted">全部完成！</p>
+                </div>
+            </div>
+            <div class="col-6">
+                <h6 style="color:#16a34a;">已签到</h6>
+                <div id="checkedList">
+                    <div th:each="n : ${p.checkedNames}" class="py-1" th:text="${n}" style="font-weight:500;"></div>
+                    <p th:if="${#lists.isEmpty(p.checkedNames)}" class="text-muted">暂无</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center mt-3 text-muted" style="font-size:.75rem;">每3秒自动刷新</p>
+    </div>
+
+</div>
+
+<!-- 代签输入 -->
+<div id="manualBox" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%,-50%); background:#fff; padding:24px; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.2); z-index:999;">
+    <h6>✍️ 输入学生学号代签</h6>
+    <form th:action="@{'/attendance/session/manualCheckIn/' + ${s.id}}" method="post">
+        <input name="studentId" class="form-control mb-2" placeholder="学号" autofocus />
+        <button class="btn btn-primary btn-sm" type="submit">确认</button>
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="document.getElementById('manualBox').style.display='none'">取消</button>
+    </form>
+</div>
+
+<th:block th:if="${s != null}">
+<script>
+    var sid = /*[[${s.id}]]*/ 0;
+    // 生成二维码：指向 /qr/{code}
+    var qrUrl = window.location.origin + '/qr/' + '/*[[${p.code}]]*/';
+    document.getElementById('qrcode').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(qrUrl);
+</script>
+</th:block>
+<th:block th:if="${s == null}">
+<script>
+    var sid = 0;
+</script>
+</th:block>
+<script th:if="${s != null}">
+
+    function revealCode(){
+        document.getElementById('revealBtn').style.display='none';
+        document.getElementById('codeDisplay').style.display='block';
+        // 10秒后自动隐藏
+        setTimeout(function(){
+            document.getElementById('codeDisplay').style.display='none';
+            document.getElementById('revealBtn').style.display='inline-block';
+        },10000);
+    }
+
+    async function doAction(url) {
+        var resp = await fetch(url, {method:'POST'});
+        var text = await resp.text();
+        if (text === '/') window.location.href = '/';
+        else location.reload();
+    }
+
+    function showManual() {
+        document.getElementById('manualBox').style.display = 'block';
+        document.getElementById('manualInput').focus();
+    }
+
+    async function doManual() {
+        var id = document.getElementById('manualInput').value.trim();
+        if (!id) return;
+        var form = new FormData();
+        form.append('studentId', id);
+        var resp = await fetch('/attendance/session/manualCheckIn/' + sid, {method:'POST', body:form});
+        var text = await resp.text();
+        document.getElementById('manualBox').style.display = 'none';
+        if (text === 'ok') refresh();
+        else alert(text);
+    }
+
+    async function refresh() {
+        try {
+            var resp = await fetch('/attendance/api/session/' + sid + '/progress');
+            var data = await resp.json();
+            if (data.error) { alert(data.error); return; }
+            document.querySelector('[data-cc]').textContent = data.checkedInCount;
+            // Reload page to get fresh Thymeleaf rendering
+            location.reload();
+        } catch(e) {}
+    }
+
+    setInterval(refresh, 3000);
+
+    // 过期自动跳转：每10秒检查
+    setInterval(async function(){
+        try {
+            var resp = await fetch('/attendance/api/session/' + sid + '/progress');
+            var data = await resp.json();
+            if (data.status === 'CLOSED') window.location.href = '/?info=签到已结束';
+        } catch(e) {}
+    }, 10000);
+</script>
+</body>
+</html>

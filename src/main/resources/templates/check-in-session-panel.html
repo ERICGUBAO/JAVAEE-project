@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>发起签到</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.0/css/bootstrap.min.css}" />
+</head>
+<body>
+<div class="container mt-5" style="max-width:500px;">
+    <h3>📋 发起签到</h3>
+    <form id="createForm">
+        <div class="mb-3">
+            <label class="form-label">选择课程</label>
+            <select class="form-select" name="courseId" required>
+                <option value="">— 请选择 —</option>
+                <option th:each="c : ${courses}"
+                        th:value="${c.courseId}"
+                        th:text="${c.courseId} + ' · ' + ${c.courseName} + '  ' + ${c.startTime} + '-' + ${c.endTime}"></option>
+            </select>
+        </div>
+        <p class="text-muted" style="font-size:.875rem;">发起后生成4位口令，有效期2分钟</p>
+        <button type="submit" class="btn btn-primary w-100">发起签到</button>
+    </form>
+    <div id="result" class="mt-3"></div>
+</div>
+
+<script>
+    document.getElementById('createForm').onsubmit = async function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        var resp = await fetch('/attendance/session/create', {method:'POST', body:formData});
+        var text = await resp.text();
+        if (text.startsWith('ERROR:')) {
+            document.getElementById('result').innerHTML = '<div class="alert alert-danger">' + text.substring(6) + '</div>';
+        } else {
+            window.location.href = text; // 跳转到面板页
+        }
+    };
+</script>
+</body>
+</html>
