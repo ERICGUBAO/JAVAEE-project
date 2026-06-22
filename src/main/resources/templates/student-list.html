@@ -21,23 +21,43 @@
         <!-- 搜索栏 -->
         <div class="search-bar mb-4">
             <form class="row g-2 align-items-end" th:action="@{/student/list}" method="get">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label text-muted" style="font-size:.8rem; font-weight:600;">学号</label>
                     <input class="form-control form-control-sm" name="studentId"
                            placeholder="搜索学号…" th:value="${studentId}" />
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label text-muted" style="font-size:.8rem; font-weight:600;">姓名</label>
                     <input class="form-control form-control-sm" name="studentName"
                            placeholder="搜索姓名…" th:value="${studentName}" />
                 </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted" style="font-size:.8rem; font-weight:600;">课程</label>
+                    <select class="form-select form-select-sm" name="courseId">
+                        <option value="">全部课程</option>
+                        <option th:each="c : ${availableCourses}"
+                                th:value="${c.courseId}"
+                                th:selected="${courseId == c.courseId}"
+                                th:text="${c.courseId} + ' ' + ${c.courseName} + ' ' + ${c.startTime} + '-' + ${c.endTime}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label text-muted" style="font-size:.8rem; font-weight:600;">学院</label>
+                    <select class="form-select form-select-sm" name="department">
+                        <option value="">全部学院</option>
+                        <option th:each="d : ${departments}"
+                                th:value="${d}" th:selected="${department == d}" th:text="${d}">
+                        </option>
+                    </select>
+                </div>
                 <input type="hidden" name="sortField" th:value="${sortField}" />
                 <input type="hidden" name="sortDir"   th:value="${sortDir}" />
                 <input type="hidden" name="size"      th:value="${pageSize}" />
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <button class="btn btn-primary btn-sm w-100" type="submit">搜索</button>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <a class="btn btn-outline-secondary btn-sm w-100" th:href="@{/student/list}">重置</a>
                 </div>
             </form>
@@ -75,6 +95,7 @@
                                 <span th:if="${sortField=='studentName'}" th:text="${sortDir=='asc'} ? '↑' : '↓'"></span>
                             </a>
                         </th>
+                        <th>学院</th>
                         <th>性别</th>
                         <th>
                             <a th:href="@{/student/list(page=1,size=${pageSize},studentId=${studentId},studentName=${studentName},sortField='courseId',sortDir=${sortField=='courseId' and sortDir=='asc' ? 'desc' : 'asc'})}">
@@ -95,12 +116,13 @@
                     </thead>
                     <tbody>
                     <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="9" class="text-center text-muted py-5">暂无学生数据</td>
+                        <td colspan="10" class="text-center text-muted py-5">暂无学生数据</td>
                     </tr>
                     <tr th:each="s : ${students}">
                         <td><input type="checkbox" class="form-check-input" name="ids" th:value="${s.id}" /></td>
                         <td th:text="${s.studentId}"></td>
                         <td th:text="${s.studentName}"></td>
+                        <td th:text="${s.department != null ? s.department : '—'}"></td>
                         <td>
                             <span th:if="${s.gender == 'M'}" style="color:#3b82f6;">♂ 男</span>
                             <span th:if="${s.gender == 'F'}" style="color:#ec4899;">♀ 女</span>

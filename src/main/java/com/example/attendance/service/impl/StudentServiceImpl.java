@@ -1,11 +1,15 @@
 package com.example.attendance.service.impl;
 
 import com.example.attendance.entity.Student;
+import com.example.attendance.entity.User;
 import com.example.attendance.repository.StudentRepository;
+import com.example.attendance.repository.UserRepository;
 import com.example.attendance.service.StudentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,16 +18,29 @@ import java.util.List;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public StudentServiceImpl(StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository,
+                              UserRepository userRepository,
+                              PasswordEncoder passwordEncoder) {
         this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public Page<Student> list(String studentId, String studentName, Pageable pageable) {
+    public Page<Student> list(String studentId, String studentName, String courseId, String department, Pageable pageable) {
         String sid = studentId == null ? "" : studentId.trim();
         String sname = studentName == null ? "" : studentName.trim();
-        return studentRepository.findByStudentIdContainingAndStudentNameContaining(sid, sname, pageable);
+        String cid = courseId == null ? "" : courseId.trim();
+        String dep = department == null ? "" : department.trim();
+        return studentRepository.findByStudentIdContainingAndStudentNameContainingAndCourseIdContainingAndDepartmentContaining(sid, sname, cid, dep, pageable);
+    }
+
+    @Override
+    public List<String> allDepartments() {
+        return studentRepository.findAllDepartments();
     }
 
     @Override
@@ -33,10 +50,20 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
     public void save(Student student) {
-        // 新增时补一个时间（可选）
         if (student.getSelectTime() == null) {
             student.setSelectTime(LocalDateTime.now());
+        }
+        // 自动创建用户账号（用户名=学号，密码=123456）
+        String sid = student.getStudentId();
+        if (sid != null && !sid.isBlank() && userRepository.findByUsername(sid).isEmpty()) {
+            User u = new User();
+            u.setUsername(sid);
+            u.setPassword(passwordEncoder.encode("123456"));
+            u.setRealName(student.getStudentName() != null ? student.getStudentName() : sid);
+            u.setRole("STUDENT");
+            userRepository.save(u);
         }
         studentRepository.save(student);
     }

@@ -18,6 +18,9 @@ public class Course {
     @Column(name = "course_name", length = 100)
     private String courseName;
 
+    @Column(name = "teacher_id")
+    private Long teacherId;
+
     @Column(name = "start_time")
     private LocalTime startTime;
 
@@ -29,6 +32,9 @@ public class Course {
 
     public String getCourseName() { return courseName; }
     public void setCourseName(String courseName) { this.courseName = courseName; }
+
+    public Long getTeacherId() { return teacherId; }
+    public void setTeacherId(Long teacherId) { this.teacherId = teacherId; }
 
     public LocalTime getStartTime() { return startTime; }
     public void setStartTime(LocalTime startTime) { this.startTime = startTime; }

@@ -19,6 +19,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         // Thymeleaf 页面路由放行
                         .requestMatchers("/login", "/register").permitAll()
+                        // 扫码签到路由放行（无需登录）
+                        .requestMatchers("/qr/**").permitAll()
                         // 其他请求需要登录
                         .anyRequest().authenticated()
                 )

@@ -22,6 +22,19 @@
         </div>
         <div class="alert alert-danger" th:if="${param.error}" th:text="${param.error[0]}" role="alert"></div>
 
+        <!-- 口令签到 -->
+        <div class="content-card mb-4" style="background: linear-gradient(135deg, #eef2ff, #faf5ff); border: 2px solid #4f46e5;">
+            <h6 style="font-weight:600; color:#4f46e5;">🔑 口令签到（推荐）</h6>
+            <p class="text-muted mb-3" style="font-size:.8125rem;">输入教师展示的4位数字口令，一键签到</p>
+            <form th:action="@{/attendance/session/join}" method="post" class="d-flex gap-2">
+                <input type="text" class="form-control" name="code"
+                       placeholder="输入4位签到口令" maxlength="4" pattern="[0-9]{4}"
+                       style="font-size:1.5rem; letter-spacing:8px; text-align:center; font-family:monospace; border-radius:8px; border:2px solid #4f46e5; max-width:200px;"
+                       autofocus />
+                <button type="submit" class="btn btn-primary" style="padding:10px 24px; font-weight:600; border-radius:8px;">签到</button>
+            </form>
+        </div>
+
         <!-- 当前时间显示 -->
         <div class="content-card mb-4 text-center" style="padding:20px;">
             <p class="text-muted mb-1" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.5px;">当前时间</p>

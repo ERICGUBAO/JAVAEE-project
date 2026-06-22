@@ -14,6 +14,10 @@
     <div class="container">
 
         <!-- 欢迎横幅 -->
+        <!-- 签到结果提示 -->
+        <div class="alert alert-success" th:if="${param.success}" th:text="${param.success[0]}" role="alert"></div>
+        <div class="alert alert-danger" th:if="${param.error}" th:text="${param.error[0]}" role="alert"></div>
+
         <div class="content-card mb-4" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color:#fff; border:none;">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                 <div>
@@ -29,6 +33,24 @@
             </div>
         </div>
 
+        <!-- 学生：活跃签到会话 -->
+        <div th:if="${role == 'STUDENT' and activeSessions != null and !#lists.isEmpty(activeSessions)}">
+            <p class="text-muted mb-3" style="font-size:.875rem; font-weight:500;">🔔 检测到正在进行的签到</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12" th:each="s : ${activeSessions}">
+                    <a class="home-card text-center" style="background: linear-gradient(135deg, #eef2ff, #faf5ff); border: 2px solid #4f46e5;"
+                       th:href="@{'/qr/' + ${s.code}}">
+                        <div style="font-size:2rem;">📋</div>
+                        <h5 style="font-size:1.1rem; color:#4f46e5;" th:text="${s.courseName} + ' · ' + ${s.teacherName}">课程 · 老师</h5>
+                        <p style="font-size:.8125rem; color:#64748b;">
+                            <span th:text="${s.courseName}"></span> · 点击即可签到
+                        </p>
+                        <span class="badge" style="background:#4f46e5; font-size:.8rem; padding:6px 20px;">👉 点击签到</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- 学生功能入口 -->
         <div th:if="${role == 'STUDENT'}">
             <p class="text-muted mb-3" style="font-size:.875rem; font-weight:500;">快捷入口</p>
@@ -37,7 +59,7 @@
                     <a class="home-card" th:href="@{/attendance/checkIn}">
                         <div class="card-icon" style="background:#eef2ff;">📋</div>
                         <h5>签到打卡</h5>
-                        <p>记录今日出勤情况</p>
+                        <p>口令签到 / 课程签到</p>
                     </a>
                 </div>
                 <div class="col-sm-6 col-md-4">
@@ -50,15 +72,48 @@
             </div>
         </div>
 
+        <!-- 教师/管理员：活跃签到会话 -->
+        <div th:if="${(role == 'TEACHER' or role == 'ADMIN') and myActiveSession != null}">
+            <p class="text-muted mb-3" style="font-size:.875rem; font-weight:500;">🔔 您有一个正在进行的签到</p>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <a class="home-card text-center"
+                       style="background: linear-gradient(135deg, #fef3c7, #fef9c3); border: 2px solid #d97706;"
+                       th:href="@{'/attendance/session/panel/' + ${myActiveSession.id}}">
+                        <div style="font-size:2rem;">📊</div>
+                        <h5 style="color:#92400e;">继续查看签到面板</h5>
+                        <p style="font-size:.875rem;">
+                            课程：<span th:text="${myActiveSession.courseName}"></span>
+                        </p>
+                        <span class="badge" style="background:#d97706; font-size:.8rem; padding:6px 20px;">进入面板 →</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- 教师/管理员功能入口 -->
         <div th:if="${role == 'TEACHER' or role == 'ADMIN'}">
             <p class="text-muted mb-3" style="font-size:.875rem; font-weight:500;">管理功能</p>
             <div class="row g-3">
+                <div class="col-sm-6 col-md-3" th:if="${myActiveSession == null}">
+                    <a class="home-card" th:href="@{/attendance/session/create}">
+                        <div class="card-icon" style="background:#fef3c7;">📋</div>
+                        <h5>发起签到</h5>
+                        <p>生成口令开始签到</p>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <a class="home-card" th:href="@{/attendance/session/history}">
+                        <div class="card-icon" style="background:#f0fdf4;">📋</div>
+                        <h5>签到记录</h5>
+                        <p>按批次查看历史签到</p>
+                    </a>
+                </div>
                 <div class="col-sm-6 col-md-3">
                     <a class="home-card" th:href="@{/attendance/list}">
                         <div class="card-icon" style="background:#eef2ff;">📊</div>
-                        <h5>考勤记录</h5>
-                        <p>查看全班出勤情况</p>
+                        <h5>考勤明细</h5>
+                        <p>查看全部出勤记录</p>
                     </a>
                 </div>
                 <div class="col-sm-6 col-md-3">

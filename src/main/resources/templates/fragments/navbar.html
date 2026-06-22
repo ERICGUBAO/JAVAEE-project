@@ -38,6 +38,7 @@
                 <span class="text-white-50" style="font-size:.85rem;">
                     👤 <span sec:authentication="name">用户</span>
                 </span>
+                <a class="btn btn-outline-light btn-sm me-1" th:href="@{/change-password}">🔒</a>
                 <form th:action="@{/logout}" method="post" class="m-0">
                     <button class="btn btn-outline-light btn-sm" type="submit">退出</button>
                 </form>

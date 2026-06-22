@@ -79,6 +79,56 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    public void checkInViaSession(String studentId, String studentName, String courseId, String ip) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("课程不存在：" + courseId));
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+
+        // 查最近3分钟内的重复签到（基于签到时间而非日期，允许同一天多次签到）
+        LocalDateTime threeMinAgo = now.minusMinutes(3);
+        Optional<Attendance> recent = attendanceRepository.findAll().stream()
+                .filter(a -> studentId.equals(a.getStudentId())
+                        && courseId.equals(a.getCourseId())
+                        && a.getCheckInTime() != null
+                        && a.getCheckInTime().isAfter(threeMinAgo))
+                .findFirst();
+
+        if (recent.isPresent()) {
+            return; // 最近的会话已签到，幂等
+        }
+
+        // 迟到判定（基于课程开始时间）
+        String status = "NORMAL";
+        if (course.getStartTime() != null) {
+            LocalDateTime classStart = LocalDateTime.of(today, course.getStartTime());
+            if (now.isAfter(classStart.plusMinutes(LATE_GRACE_MINUTES))) {
+                status = "LATE";
+            }
+        }
+
+        Attendance attendance = new Attendance();
+        attendance.setStudentId(studentId);
+        attendance.setStudentName(studentName);
+        attendance.setCourseId(courseId);
+        attendance.setAttendDate(today);
+        attendance.setCheckInTime(now);
+        attendance.setStatus(status);
+        attendance.setIp(ip);
+        attendance.setCreateTime(now);
+
+        attendanceRepository.save(attendance);
+    }
+
+    @Override
+    public boolean alreadyCheckedIn(String studentId, String courseId) {
+        return attendanceRepository
+                .findByStudentIdAndCourseIdAndAttendDate(studentId, courseId, LocalDate.now())
+                .isPresent();
+    }
+
+    @Override
     public void checkOut(String studentId, String courseId, String ip) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("课程不存在：" + courseId));

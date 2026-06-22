@@ -27,6 +27,10 @@ public class Student {
     @Column(name = "student_name", nullable = false, length = 50)
     private String studentName;
 
+    @Size(max = 30, message = "学院名长度不能超过30")
+    @Column(name = "department", length = 30)
+    private String department;
+
     // 允许空；如果填，只能 M/F
     @Pattern(regexp = "^(|M|F)$", message = "性别只能是 M 或 F")
     @Column(name = "gender", columnDefinition = "char(1)")
@@ -63,6 +67,9 @@ public class Student {
 
     public String getStudentName() { return studentName; }
     public void setStudentName(String studentName) { this.studentName = studentName; }
+
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
 
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }

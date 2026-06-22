@@ -8,7 +8,9 @@ import java.util.List;
 
 public interface StudentService {
 
-    Page<Student> list(String studentId, String studentName, Pageable pageable);
+    Page<Student> list(String studentId, String studentName, String courseId, String department, Pageable pageable);
+
+    List<String> allDepartments();
 
     Student findById(Integer id);
 
